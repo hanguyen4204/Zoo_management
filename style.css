@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background-color: #fdfcf7;
+  color: #333;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #3b6e3b;
+  color: white;
+  padding: 15px 40px;
+}
+
+header .logo {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+nav a {
+  color: white;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Banner */
+.banner {
+  text-align: center;
+  padding: 80px 20px;
+  background: url('https://placehold.co/1200x300?text=Zoo+Banner') center/cover no-repeat;
+  color: white;
+  background-color: #4a8c4a;
+}
+
+/* Search bar */
+.search-bar {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.search-bar input {
+  width: 250px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.search-bar button {
+  padding: 8px 12px;
+  background: #3b6e3b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Animal list */
+.animal-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+.animal-card {
+  width: 200px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.animal-card img {
+  width: 100%;
+  border-radius: 10px 10px 0 0;
+}
+
+.animal-card h3 {
+  margin: 10px 0 5px;
+}
+
+/* Form (login/signup) */
+.form-container {
+  width: 350px;
+  margin: 100px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #3b6e3b;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-container label {
+  margin: 10px 0 5px;
+  font-weight: 500;
+}
+
+.form-container input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-container button {
+  margin-top: 20px;
+  padding: 10px;
+  background: #3b6e3b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.form-container button:hover {
+  background: #2e572e;
+}
+
+.form-container p {
+  text-align: center;
+  margin-top: 15px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #3b6e3b;
+  color: white;
+  margin-top: 40px;
+}
