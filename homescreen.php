@@ -12,41 +12,76 @@ include "connection.php";
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
-<body>
-<div class="container">
-    <!-- short column display for forms rows -->
-   <!--visit https://www.w3schools.com/bootstrap/bootstrap_forms.asp search for forms template and use it.-->
-    <div class="col-lg-4">
-    <h2>Thông tin động vật</h2>
-    <form action="" name="form1" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="firstname">Tên: </label>
-            <input type="text" class="form-control" id="AName" placeholder="" name="AName">
+    <body style="background-color: #f4f6f9;"> <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🦁 Zoo Admin</a>
+            <div class="ml-auto">
+                <a href="add_animal.php" class="btn btn-light btn-sm">+ Thêm mới</a>
+                <a href="logout.php" class="btn btn-outline-light btn-sm ml-2">Đăng xuất</a>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="lastname">Giống loài: </label>
-            <input type="text" class="form-control" id="Species" placeholder="" name="Species">
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng số con vật</h5>
+                        <p class="card-text display-4">25</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Loài vật</h5>
+                        <p class="card-text display-4">8</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Cần chú ý</h5>
+                        <p class="card-text display-4">2</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="email">Khu vực: </label>
-            <input type="text" class="form-control" id="Area" placeholder="" name="Area">
+
+        <div class="card shadow">
+            <div class="card-header bg-white border-0">
+                <h4 class="mb-0">Danh sách Động vật</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover align-middle">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Ảnh</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th class="text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>19</td>
+                            <td><img src="uploads/ho.jpg" class="rounded-circle" width="50" height="50" style="object-fit: cover;"></td>
+                            <td><strong>Mimi</strong></td>
+                            <td>Con hổ trắng béo nhất...</td>
+                            <td class="text-right">
+                                <a href="#" class="btn btn-sm btn-info text-white">Xem</a>
+                                <a href="#" class="btn btn-sm btn-danger">Xóa</a>
+                            </td>
+                        </tr>
+                         </tbody>
+                </table>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="contact">Ngày sinh</label>
-            <input type="date" class="form-control" id="Date" placeholder="" name="Date">
-        </div>
-        <div class="form-group">
-            <label for="email">Mô tả: </label>
-            <input type="text" class="form-control" id="Des" placeholder="" name="Des">
-        </div>
-        <div class="form-group">
-        <label for="photo">Tải ảnh lên</label>
-        <input type="file" class="form-control" required id="photo" name="photo">
     </div>
-    <div class="form-group">
-    <label for="search">Tìm kiếm bằng tên</label>
-    <input type="text" class="form-control" id="search" name="search_name" placeholder="Enter firstname to search">
-</div>
+
         <button type="submit" name="insert" class="btn btn-default">Thêm động vật</button>
         <button type="submit" name="search" class="btn btn-primary" formnovalidate>Tìm kiếm</button>
         <a href="index.php" class="btn btn-primary mt-3">Đăng xuất</a>
