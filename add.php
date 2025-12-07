@@ -60,7 +60,7 @@ if(isset($_POST["insert"]))
         // Lưu đường dẫn ảnh vào DB
         mysqli_query($link, "INSERT INTO table1 VALUES (NULL,'$_POST[AName]' ,'$_POST[Species]','$_POST[Area]','$_POST[Date]','$target_file','$_POST[Des]')");
 
-        echo "<script>window.location.href = window.location.href;</script>";
+        echo "<script>window.location.href = 'homescreen.php?msg=success';</script>";
     } else {
         echo "<div class='alert alert-danger'>File không phải là ảnh hợp lệ.</div>";
     }
