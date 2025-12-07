@@ -1,60 +1,16 @@
 <?php
 include "connection.php";
-
-// Kiểm tra ID
-if (!isset($_GET['id'])) {
-    echo "Lỗi: Không có ID.";
-    exit;
-}
-
-$id = $_GET['id'];
-
-// Xử lý Update
-if (isset($_POST['update'])) {
-
-    $firstname = $_POST['AName'];
-    $lastname  = $_POST['Species'];
-    $email     = $_POST['Area'];
-    $contact   = $_POST['Date'];
-    $des      = $_POST['des'];
-
-    $update_sql = "
-        UPDATE table1 SET 
-        AName='$firstname',
-        Species='$lastname',
-        Area='$email',
-        Date='$contact'
-        des='$des'
-
-        WHERE id=$id
-    ";
-
-    mysqli_query($link, $update_sql);
-
-    echo "<script>alert('Cập nhật thành công!'); window.location.href='edit.php?id=$id';</script>";
-    exit;
-}
-
-// Lấy dữ liệu
-$sql = "SELECT * FROM table1 WHERE id = $id";
-$res = mysqli_query($link, $sql);
-$data = mysqli_fetch_assoc($res);
-
-if (!$data) {
-    echo "Không tìm thấy dữ liệu.";
-    exit;
-}
-
-$edit_mode = isset($_GET['edit']);
-
 ?>
-
-<!DOCTYPE html>
-<html>
+<html lang="en" xmlns="">
 <head>
     <title>Thông tin chi tiết</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
     <style>
         .detail-box {
             border: 1px solid #ddd;
@@ -158,3 +114,54 @@ $edit_mode = isset($_GET['edit']);
 
 </body>
 </html>
+
+<?php
+// Kiểm tra ID
+if (!isset($_GET['id'])) {
+    echo "Lỗi: Không có ID.";
+    exit;
+}
+
+$id = $_GET['id'];
+
+// Xử lý Update
+if (isset($_POST['update'])) {
+
+    $firstname = $_POST['AName'];
+    $lastname  = $_POST['Species'];
+    $email     = $_POST['Area'];
+    $contact   = $_POST['Date'];
+    $des      = $_POST['des'];
+
+    $update_sql = "
+        UPDATE table1 SET 
+        AName='$firstname',
+        Species='$lastname',
+        Area='$email',
+        Date='$contact'
+        des='$des'
+
+        WHERE id=$id
+    ";
+
+    mysqli_query($link, $update_sql);
+
+    echo "<script>alert('Cập nhật thành công!'); window.location.href='edit.php?id=$id';</script>";
+    exit;
+}
+
+// Lấy dữ liệu
+$sql = "SELECT * FROM table1 WHERE id = $id";
+$res = mysqli_query($link, $sql);
+$data = mysqli_fetch_assoc($res);
+
+if (!$data) {
+    echo "Không tìm thấy dữ liệu.";
+    exit;
+}
+
+$edit_mode = isset($_GET['edit']);
+
+?>
+
+
