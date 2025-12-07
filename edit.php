@@ -59,7 +59,7 @@ header("location.index.php");
             </div>
             <div class="form-group">
                 <label for="photo">Tải ảnh lên:</label>
-                <input type="file" class="form-control" required id="photo" name="photo">
+                <input type="file" class="form-control" id="photo" name="photo">
             </div>
             <button type="submit" name="update" class="btn btn-default">Cập nhật</button>
             <a href="view_animal.php?id=<?php echo $id; ?>" class="btn btn-primary mt-3">Quay lại</a>
@@ -67,28 +67,42 @@ header("location.index.php");
         </form>
     </div>
 </div>
-
 </body>
-
 <?php
 if(isset($_POST["update"]))
 {
+    $id = $_GET['id'];
+    $sql = "UPDATE table1 SET 
+            AName='$_POST[AName]',
+            Species='$_POST[Species]',
+            Area='$_POST[Area]',
+            Date='$_POST[Date]',
+            des='$_POST[des]' 
+            WHERE id=$id";
+    if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] == 0) {
         
         $target_dir = "uploads/";
-    $target_file = $target_dir . basename($_FILES["photo"]["name"]);
-    $check = getimagesize($_FILES["photo"]["tmp_name"]);
-    // move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
-    if ($check !== false) {
-        move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
-        mysqli_query($link,"update table1 set AName='$_POST[AName]',Species='$_POST[Species]',Area='$_POST[Area]',Date='$_POST[Date]',des='$_POST[des]', photo='$target_file' where id=$id");
-        echo "<script>window.location.href = window.location.href;</script>";
-    } else {    
-
-         echo "<div class='alert alert-danger'>File không phải là ảnh hợp lệ.</div>";
+        $target_file = $target_dir . basename($_FILES["photo"]["name"]);
+        $check = getimagesize($_FILES["photo"]["tmp_name"]);
+        
+        if ($check !== false) {
+            move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
+            $sql = "UPDATE table1 SET 
+                    AName='$_POST[AName]',
+                    Species='$_POST[Species]',
+                    Area='$_POST[Area]',
+                    Date='$_POST[Date]',
+                    des='$_POST[des]',
+                    photo='$target_file' 
+                    WHERE id=$id";
+        }
     }
-    header("Location: view_animal.php?id=$id");
-    exit();
-    
+
+if (mysqli_query($link, $sql)) {
+    echo "<script>window.location.href='view_animal.php?id=$id&msg=success';</script>";
+} else {
+    echo "Lỗi SQL: " . mysqli_error($link);
+}
 }
 ?>
 
