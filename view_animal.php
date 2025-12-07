@@ -79,6 +79,16 @@ $edit_mode = isset($_GET['edit']);
 <body>
 
 <div class="container mt-5">
+    <?php
+        if (isset($_GET['msg']) && $_GET['msg'] == 'success') {
+            echo '
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Thành công!</strong> Thông tin động vật đã được cập nhật.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            ';
+            }
+    ?>
 
     <h2 class="mb-4">Thông tin chi tiết động vật</h2>
 
