@@ -14,24 +14,51 @@ include "connection.php";
 </head>
 <body>
 <div class="container">
-    <!-- short column display for forms rows -->
-   <!--visit https://www.w3schools.com/bootstrap/bootstrap_forms.asp search for forms template and use it.-->
-    <div class="col-lg-4">
-        <h2>Thông tin động vật</h2>
-        <form action="" name="form1" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-        <label for="search">Tìm kiếm bằng tên</label>
-        <input type="text" class="form-control" id="search" name="search_name" placeholder="Enter firstname to search">
+    
+    <div class="row" style="border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+        <div class="col-md-6 col-xs-6">
+            <h2 style="margin-top: 10px;">Thông tin động vật</h2>
+        </div>
+        
+        <div class="col-md-6 col-xs-6 text-right">
+            <a href="index.php" class="btn btn-danger" style="margin-top: 15px;">Đăng xuất</a>
+        </div>
     </div>
-        <a href="add.php" class="btn btn-default" type="submit" name="insert" >Thêm động vật</a>
-        <button type="submit" name="search" class="btn btn-primary" formnovalidate>Tìm kiếm</button>
-        <a href="index.php" class="btn btn-primary mt-3">Đăng xuất</a>
-    </form>
-</div>
-</div>
 
-<!-- new column inserted for records -->
-<!-- Search for boostrap table template online and copy code -->
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-12">
+            <form action="" method="post" class="form-inline">
+                
+                <div class="form-group">
+                    <label class="sr-only" for="search">Tìm kiếm</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search_name" placeholder="Nhập tên..." value="<?php if(isset($_POST['search_name'])) echo $_POST['search_name']; ?>" style="width: 300px;">
+                        <div class="input-group-btn">
+                            <button type="submit" name="search" class="btn btn-primary">
+                                Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="add.php" class="btn btn-success" style="margin-left: 10px;">
+                    + Thêm động vật
+                </a>
+
+            </form>
+        </div>
+    </div>
+
+    <?php
+    if (isset($_GET['msg']) && $_GET['msg'] == 'success') {
+        echo '
+        <div id="success-alert" class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Thành công!</strong> Đã thêm động vật mới.
+        </div>
+        ';
+    }
+    ?>
 <div class="col-lg-12">
     <table class="table table-bordered">
         <thead>
@@ -73,5 +100,4 @@ include "connection.php";
     </table>
 </div>
 </body>
-
 </html>
