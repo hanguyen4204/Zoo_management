@@ -38,7 +38,7 @@ include "connection.php";
                 </div>
                 <div class="form-group">
                 <label for="photo">Tải ảnh lên</label>
-                <input type="file" class="form-control" required id="photo" name="photo">
+                <input type="file" class="form-control" id="photo" name="photo">
             </div>
                 <button type="submit" name="insert" class="btn btn-default">Thêm động vật</button>
                 <a href="homescreen.php" class="btn btn-primary mt-3">Quay lại</a>
@@ -49,22 +49,33 @@ include "connection.php";
 <?php
 if(isset($_POST["insert"]))
 {
-    // mysqli_query($link,"insert into table1 values (NULL,'$_POST[firstname]' ,'$_POST[lastname]','$_POST[email]','$_POST[contact]','$_FILES[photo]')");
-    $target_dir = "uploads/";
-    $target_file = $target_dir . basename($_FILES["photo"]["name"]);
-    // move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
-    $check = getimagesize($_FILES["photo"]["tmp_name"]);
-    if ($check !== false) {
-        move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
+    $target_file = "";
+    if (isset($_FILES["photo"]) && $_FILES["photo"]["error"] == 0) {
+        
+        $temp_file = "uploads/" . basename($_FILES["photo"]["name"]);
+        
+        // Chỉ chạy getimagesize khi chắc chắn có file
+        $check = getimagesize($_FILES["photo"]["tmp_name"]);
 
-        // Lưu đường dẫn ảnh vào DB
-        mysqli_query($link, "INSERT INTO table1 VALUES (NULL,'$_POST[AName]' ,'$_POST[Species]','$_POST[Area]','$_POST[Date]','$target_file','$_POST[Des]')");
+        if ($check !== false) {
+            if (move_uploaded_file($_FILES["photo"]["tmp_name"], $temp_file)) {
+                // Upload thành công -> Cập nhật lại đường dẫn ảnh
+                $target_file = $temp_file;
+            } else {
+                echo "Lỗi khi di chuyển file.";
+            }
+        } else {
+            echo "File không phải là ảnh hợp lệ.";
+        }
+    }
+    $sql = "INSERT INTO table1 (AName, Species, Area, Date, photo, des) 
+            VALUES ('$_POST[AName]', '$_POST[Species]', '$_POST[Area]', '$_POST[Date]', '$target_file', '$_POST[Des]')";
 
-        echo "<script>window.location.href = 'homescreen.php?msg=success';</script>";
+    if (mysqli_query($link, $sql)) {
+         echo "<script>window.location.href = 'homescreen.php?msg=success';</script>";
     } else {
-        echo "<div class='alert alert-danger'>File không phải là ảnh hợp lệ.</div>";
+         echo "Lỗi SQL: " . mysqli_error($link);
     }
 }
-
 ?>
 </html>
