@@ -93,7 +93,7 @@ include "connection.php";
                 <h1 class="page-title">🐾 Thông tin Động Vật</h1>
             </div>
             <div class="col-xs-6 text-right">
-                <a href="index.php" class="btn btn-logout btn-pill">
+<a href="logout.php" class="btn btn-logout btn-pill">
                     <i class="fa fa-sign-out"></i> Đăng xuất
                 </a>
             </div>
@@ -164,7 +164,7 @@ include "connection.php";
 
                     // ❗ NGƯỜI DÙNG CHỈ ĐƯỢC XEM (KHÔNG SỬA/XÓA)
                     echo "<td class='text-center'>
-                            <a href='view_animal.php?id=" . $row["id"] . "' 
+                            <a href='view_animal_user.php?id=" . $row["id"] . "' 
                                class='btn btn-info btn-xs btn-pill'>
                                 <i class='fa fa-eye'></i> Xem
                             </a>
