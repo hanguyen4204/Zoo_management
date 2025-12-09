@@ -1,34 +1,133 @@
 <?php
-/* -------------------- SESSION -------------------- */
+<<<<<<< HEAD
+/* -------------------- 1. CẤU HÌNH SESSION & KẾT NỐI -------------------- */
+=======
+
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
 $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 session_set_cookie_params([
-    'lifetime' => 60*60*24,
-    'path' => '/',
-    'secure' => $secure,
-    'httponly' => true,
-    'samesite' => 'Lax'
+  'lifetime' => 60*60*24,
+  'path' => '/',
+  'domain' => '',
+  'secure' => $secure,
+  'httponly' => true,
+  'samesite' => 'Lax'
 ]);
 session_start();
 
-require_once "connection1.php";
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
 
-/* -------------------- AUTO REDIRECT -------------------- */
+<<<<<<< HEAD
+/* -------------------- 2. TỰ ĐỘNG CHUYỂN HƯỚNG (LOGIC MỚI) -------------------- */
+// Nếu đã đăng nhập, kiểm tra Role để chuyển đúng trang
 if (isset($_SESSION['user_id'])) {
-    header("Location: " . ($_SESSION['role'] === 'admin' ? "admin_dashboard.php" : "homescreen.php"));
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: admin_dashboard.php");
+    } else {
+        header("Location: homescreen.php");
+    }
+=======
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+function is_logged_in() {
+    return !empty($_SESSION['user_id']);
+}
+
+function current_role() {
+    return $_SESSION['role'] ?? null;
+}
+
+function is_admin() {
+    return (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
+}
+
+function is_user() {
+    return (isset($_SESSION['role']) && $_SESSION['role'] === 'user');
+}
+
+function deny($msg = 'Bạn không có quyền truy cập.') {
+    http_response_code(403);
+    echo $msg;
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
     exit;
 }
 
+/**
+ * require_login() - chuyển hướng về trang login (mặc định index.php) nếu chưa login
+ * Sử dụng ở những trang cần login bắt buộc (ví dụ homescreen.php)
+ */
+function require_login($redirect = 'index.php') {
+    if (!is_logged_in()) {
+        header("Location: $redirect");
+        exit;
+    }
+}
+
+/**
+ * require_role($role) - đảm bảo user có role tương ứng (vd 'admin')
+ * Nếu không hợp lệ -> deny()
+ */
+function require_role($role) {
+    if (!is_logged_in()) deny('Vui lòng đăng nhập.');
+    if ($role === 'admin' && !is_admin()) deny('Chỉ admin mới được truy cập.');
+    if ($role === 'user' && !is_user()) deny('Chỉ user mới được truy cập.');
+}
+
+/**
+ * require_any_role(['admin','user'])
+ */
+function require_any_role(array $roles) {
+    if (!is_logged_in()) deny('Vui lòng đăng nhập.');
+    if (!in_array(current_role(), $roles, true)) deny('Bạn không có quyền.');
+}
+
+/**
+ * check_session_timeout($maxIdleSeconds)
+ * - optional: gọi trong pages để auto logout khi idle
+ */
+function check_session_timeout($maxIdle = 1800) {
+    if (!isset($_SESSION['last_active'])) {
+        $_SESSION['last_active'] = time();
+        return;
+    }
+    if (time() - $_SESSION['last_active'] > $maxIdle) {
+        session_unset();
+        session_destroy();
+        header("Location: index.php?timeout=1");
+        exit;
+    }
+    $_SESSION['last_active'] = time();
+}
+
+require_once 'connection1.php';
+
+$success = '';
 $errors = [];
+$success = ''; // Biến để thông báo đăng ký thành công nếu cần
 
-/* -------------------- FORM HANDLE -------------------- */
+<<<<<<< HEAD
+/* -------------------- 3. XỬ LÝ FORM (LOGIC MỚI) -------------------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'];
+=======
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    $errors[] = "Yêu cầu không hợp lệ (CSRF).";
+  } else {
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+    $action = $_POST['action'] ?? '';
 
-    /* ---------- LOGIN ---------- */
-    if ($action === 'login') {
-        $email = strtolower(trim($_POST['email']));
-        $password = $_POST['password'];
+    if ($action === 'signup') {
+      $username = trim($_POST['username'] ?? '');
+      $email = strtolower(trim($_POST['email'] ?? ''));
+      $password = $_POST['password'] ?? '';
+      $password_confirm = $_POST['password_confirm'] ?? '';
 
+<<<<<<< HEAD
+        // Truy vấn user
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
@@ -36,18 +135,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$user || !password_verify($password, $user['password'])) {
             $errors[] = "Email hoặc mật khẩu không đúng.";
         } else {
-            // Login OK – auto detect role
+            // Login thành công -> Lưu session
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
+            $_SESSION['role'] = $user['role']; // Quan trọng cho logic Admin
 
-            header("Location: " . ($user['role'] === 'admin' ? "admin_dashboard.php" : "homescreen.php"));
+            // Chuyển hướng dựa trên Role
+            if ($user['role'] === 'admin') {
+                header("Location: admin_dashboard.php");
+            } else {
+                header("Location: homescreen.php");
+            }
             exit;
         }
     }
 
-    /* ---------- SIGNUP (user only) ---------- */
+    /* ---------- SIGNUP (Mặc định là User) ---------- */
     if ($action === 'signup') {
         $username = trim($_POST['username']);
         $email = strtolower(trim($_POST['email']));
@@ -56,123 +160,355 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($username === "" || $email === "" || $password === "") {
             $errors[] = "Vui lòng điền đầy đủ thông tin.";
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = "Email không hợp lệ.";
-        }
-        if ($password !== $confirm) {
+        } elseif ($password !== $confirm) {
             $errors[] = "Mật khẩu xác nhận không khớp.";
-        }
+        } else {
+            // Kiểm tra email tồn tại
+            $check = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+            $check->execute([$email]);
+            if ($check->fetch()) {
+                $errors[] = "Email này đã được sử dụng.";
+            } else {
+                // Tạo tài khoản mới (Role mặc định là user)
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
+                
+                if ($stmt->execute([$username, $email, $hash])) {
+                    $uid = $pdo->lastInsertId();
 
-        // check email exists
-        $check = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-        $check->execute([$email]);
-        if ($check->fetch()) {
-            $errors[] = "Email này đã được sử dụng.";
-        }
+                    // Tự động đăng nhập luôn sau khi đăng ký
+                    session_regenerate_id(true);
+                    $_SESSION['user_id'] = $uid;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['role'] = 'user';
 
-        if (empty($errors)) {
+                    header("Location: homescreen.php");
+                    exit;
+                } else {
+                    $errors[] = "Lỗi hệ thống khi tạo tài khoản.";
+                }
+            }
+=======
+      if ($username === '' || $email === '' || $password === '') {
+        $errors[] = "Vui lòng điền đủ thông tin.";
+      } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Email không hợp lệ.";
+      } elseif ($password !== $password_confirm) {
+        $errors[] = "Mật khẩu xác nhận không khớp.";
+      } elseif (strlen($password) < 6) {
+        $errors[] = "Mật khẩu quá ngắn (tối thiểu 6 ký tự).";
+      }
+
+      if (empty($errors)) {
+        try {
+          $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+          $stmt->execute([$email]);
+          if ($stmt->fetch()) {
+            $errors[] = "Email đã được sử dụng.";
+          } else {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-
-            // FORCE role = user
-            $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
+            $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
             $stmt->execute([$username, $email, $hash]);
 
-            $uid = $pdo->lastInsertId();
-
+            $newUserId = $pdo->lastInsertId();
             session_regenerate_id(true);
-            $_SESSION['user_id'] = $uid;
+            $_SESSION['user_id'] = $newUserId;
             $_SESSION['username'] = $username;
-            $_SESSION['role'] = 'user';
+            $_SESSION['last_active'] = time();
+
+            header("Location: index.php");
+            exit;
+          }
+        } catch (PDOException $e) {
+          $errors[] = "Lỗi hệ thống, vui lòng thử lại sau.";
+        }
+      }
+
+    } elseif ($action === 'login') {
+      $email = strtolower(trim($_POST['email'] ?? ''));
+      $password = $_POST['password'] ?? '';
+
+      if ($email === '' || $password === '') {
+        $errors[] = "Vui lòng điền email và mật khẩu.";
+      } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Email không hợp lệ.";
+      }
+
+      if (empty($errors)) {
+        try {
+          $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE email = ?");
+          $stmt->execute([$email]);
+          $user = $stmt->fetch();
+
+          if ($user && password_verify($password, $user['password'])) {
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['last_active'] = time();
 
             header("Location: homescreen.php");
             exit;
+          } else {
+            $errors[] = "Email hoặc mật khẩu không đúng.";
+          }
+        } catch (PDOException $e) {
+          $errors[] = "Lỗi hệ thống, vui lòng thử lại sau.";
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
         }
+      }
+
+    } else {
+      $errors[] = "Hành động không hợp lệ.";
     }
+  }
+}
+
+$openTab = 'login';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signup') {
+  $openTab = 'signup';
+}
+
+// Xác định tab nào sẽ mở khi load trang (nếu đăng ký lỗi thì giữ ở tab đăng ký)
+$openTab = 'login';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signup') {
+    $openTab = 'signup';
 }
 ?>
-
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8"/>
-<title>Zoo Management - Login</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+<<<<<<< HEAD
+  <title>Zoo Management</title>
+=======
+  <title>Zoo Auth</title>
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+  <style>
+    :root{--green:#2f7a2f;--bg:#f4f6f4;--card:#fff;--muted:#6b7280;--danger:#d23b3b}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif}
+<<<<<<< HEAD
+    body{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+    .welcome{text-align:center;margin-bottom:14px}
+    .welcome h1{margin:0;font-size:28px;color:var(--green)}
+    .welcome p{margin:6px 0 0;color:var(--muted)}
+    .auth-box{width:100%;max-width:420px;background:var(--card);padding:26px;border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,0.10)}
+    .tabs{display:flex;background:#f3f4f5;border-radius:8px;overflow:hidden;margin-bottom:16px}
+    .tab{flex:1;padding:10px 0;text-align:center;font-weight:600;color:#444;cursor:pointer}
+    .tab.active{background:var(--green);color:#fff}
+    h2{margin:0 0 10px;color:var(--green)}
+    label{display:block;margin:10px 0 6px;font-weight:600;color:#111}
+    input[type=email],input[type=text],input[type=password]{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px}
+    .btn{width:100%;margin-top:14px;padding:10px;border-radius:8px;background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer;transition:0.2s}
+    .btn:hover{background:#266326}
+    .muted{color:var(--muted);font-size:0.9rem;margin-top:8px}
+    .msg{padding:12px;border-radius:8px;margin-bottom:12px;font-size:0.95rem}
+    .error{background:#fff5f5;color:var(--danger);border:1px solid rgba(210,59,59,0.15)}
+    .success{background:#eef8ef;color:var(--green);border:1px solid rgba(47,122,47,0.15)}
+=======
+    
+    body{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      background:var(--bg);
+      padding:20px;
+    }
 
-<link rel="stylesheet" href="style.css">
+    /* Welcome */
+    .welcome{text-align:center;margin-bottom:14px}
+    .welcome h1{margin:0;font-size:28px;color:var(--green)}
+    .welcome p{margin:6px 0 0;color:var(--muted)}
+
+    /* Auth card */
+    .auth-box{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      padding:26px;
+      border-radius:12px;
+      box-shadow:0 10px 26px rgba(0,0,0,0.10);
+    }
+
+    .tabs{
+      display:flex;background:#f3f4f5;border-radius:8px;overflow:hidden;margin-bottom:16px
+    }
+    .tab{flex:1;padding:10px 0;text-align:center;font-weight:600;color:#444;cursor:pointer}
+    .tab.active{background:var(--green);color:#fff}
+
+    h2{margin:0 0 10px;color:var(--green)}
+
+    label{display:block;margin:10px 0 6px;font-weight:600;color:#111}
+    input[type=email],input[type=text],input[type=password]{
+      width:100%;padding:10px;border:1px solid #ddd;border-radius:8px
+    }
+    .btn{
+      width:100%;margin-top:14px;padding:10px;border-radius:8px;
+      background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer
+    }
+    .muted{color:var(--muted);font-size:0.9rem;margin-top:8px}
+
+    .msg{padding:12px;border-radius:8px;margin-bottom:12px;font-size:0.95rem}
+    .error{background:#fff5f5;color:var(--danger);border:1px solid rgba(210,59,59,0.15)}
+    .success{background:#eef8ef;color:var(--green);border:1px solid rgba(47,122,47,0.15)}
+
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+    ul.err-list{margin:0;padding-left:18px}
+  </style>
 </head>
 <body>
 
-<div class="box">
+  <div class="welcome">
+    <h1>Welcome to Zoo Management</h1>
+<<<<<<< HEAD
+=======
+    <p>Đăng nhập hoặc đăng ký để tiếp tục</p>
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+  </div>
 
-<?php if ($errors): ?>
-<div class="error">
-    <?php foreach ($errors as $e) echo "<div>$e</div>"; ?>
-</div>
-<?php endif; ?>
+  <div class="auth-box">
+    
+    <?php if (!empty($errors)): ?>
+      <div class="msg error">
+        <ul class="err-list">
+        <?php foreach ($errors as $e): ?>
+          <li><?= htmlspecialchars($e) ?></li>
+        <?php endforeach; ?>
+        </ul>
+      </div>
+    <?php endif; ?>
 
-<div class="tabs">
-    <div id="tab-login" class="tab active">Đăng nhập</div>
-    <div id="tab-signup" class="tab">Đăng ký (User)</div>
-</div>
+<<<<<<< HEAD
+    <div class="tabs">
+      <div id="tab-login" class="tab">Đăng nhập</div>
+      <div id="tab-signup" class="tab">Đăng ký</div>
+    </div>
 
-<!-- LOGIN -->
-<div id="panel-login">
-<form method="POST">
-    <input type="hidden" name="action" value="login">
+    <div id="panel-login">
+      <form method="POST">
+        <input type="hidden" name="action" value="login">
 
-    <label>Email</label>
-    <input type="email" name="email" required>
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
 
-    <label>Mật khẩu</label>
-    <input type="password" name="password" required>
+        <label>Mật khẩu</label>
+        <input type="password" name="password" placeholder="Mật khẩu" required>
 
-    <button>Đăng nhập</button>
-</form>
-</div>
+        <button class="btn">Đăng nhập</button>
+      </form>
+      <div class="muted">Chưa có tài khoản? <a href="#" onclick="activateTab('signup');return false">Đăng ký</a></div>
+    </div>
 
-<!-- SIGNUP -->
-<div id="panel-signup" style="display:none">
-<form method="POST">
-    <input type="hidden" name="action" value="signup">
+    <div id="panel-signup" style="display:none">
+      <form method="POST">
+        <input type="hidden" name="action" value="signup">
 
-    <label>Tên người dùng</label>
-    <input type="text" name="username" required>
+        <label>Tên người dùng</label>
+        <input type="text" name="username" placeholder="Tên hiển thị" required value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
 
-    <label>Email</label>
-    <input type="email" name="email" required>
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
 
-    <label>Mật khẩu</label>
-    <input type="password" name="password" required>
+        <label>Mật khẩu</label>
+        <input type="password" name="password" placeholder="Tối thiểu 6 ký tự" required>
 
-    <label>Xác nhận mật khẩu</label>
-    <input type="password" name="password_confirm" required>
+        <label>Nhập lại mật khẩu</label>
+        <input type="password" name="password_confirm" placeholder="Xác nhận mật khẩu" required>
 
-    <button>Đăng ký</button>
-</form>
-</div>
+        <button class="btn">Đăng ký</button>
+      </form>
+      <div class="muted">Đã có tài khoản? <a href="#" onclick="activateTab('login');return false">Đăng nhập</a></div>
+    </div>
 
-</div>
+=======
+    <?php if ($success): ?>
+      <div class="msg success"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
+
+    <div class="tabs">
+      <div id="tab-login" class="tab">Đăng nhập</div>
+      <div id="tab-signup" class="tab">Đăng ký</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panel-login">
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+        <input type="hidden" name="action" value="login">
+
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required>
+
+        <label>Mật khẩu</label>
+        <input type="password" name="password" placeholder="Mật khẩu" required>
+
+        <button class="btn">Đăng nhập</button>
+      </form>
+      <div class="muted">Chưa có tài khoản? <a href="#" onclick="activateTab('signup');return false">Đăng ký</a></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="panel-signup" style="display:none">
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+        <input type="hidden" name="action" value="signup">
+
+        <label>Tên người dùng</label>
+        <input type="text" name="username" placeholder="Tên hiển thị" required>
+
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required>
+
+        <label>Mật khẩu</label>
+        <input type="password" name="password" placeholder="Tối thiểu 6 ký tự" required>
+
+        <label>Nhập lại mật khẩu</label>
+        <input type="password" name="password_confirm" placeholder="Xác nhận mật khẩu" required>
+
+        <button class="btn">Đăng ký</button>
+      </form>
+      <div class="muted">Đã có tài khoản? <a href="#" onclick="activateTab('login');return false">Đăng nhập</a></div>
+    </div>
+
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+  </div>
 
 <script>
-const tabLogin=document.getElementById("tab-login");
-const tabSignup=document.getElementById("tab-signup");
-const panelLogin=document.getElementById("panel-login");
-const panelSignup=document.getElementById("panel-signup");
+  const tabLogin = document.getElementById("tab-login");
+  const tabSignup = document.getElementById("tab-signup");
+  const panelLogin = document.getElementById("panel-login");
+  const panelSignup = document.getElementById("panel-signup");
 
-tabLogin.onclick=()=>{
-    tabLogin.classList.add("active");
-    tabSignup.classList.remove("active");
-    panelLogin.style.display="block";
-    panelSignup.style.display="none";
-};
+  function activateTab(tab){
+    if(tab === "login"){
+      tabLogin.classList.add("active");
+      tabSignup.classList.remove("active");
+      panelLogin.style.display = "block";
+      panelSignup.style.display = "none";
+    } else {
+      tabSignup.classList.add("active");
+      tabLogin.classList.remove("active");
+      panelSignup.style.display = "block";
+      panelLogin.style.display = "none";
+    }
+  }
 
-tabSignup.onclick=()=>{
-    tabSignup.classList.add("active");
-    tabLogin.classList.remove("active");
-    panelSignup.style.display="block";
-    panelLogin.style.display="none";
-};
+<<<<<<< HEAD
+  // Mở đúng tab dựa trên biến PHP (nếu lỗi đăng ký thì mở tab đăng ký)
+=======
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
+  activateTab(<?= json_encode($openTab) ?>);
 </script>
 
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+
+
+>>>>>>> c8cd1a489b5d97a5c59402880e62d94b72da56bf
