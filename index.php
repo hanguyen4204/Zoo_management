@@ -98,34 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="utf-8"/>
 <title>Zoo Management - Login</title>
 
-<style>
-    :root{--green:#2f7a2f;--bg:#f4f6f4}
-    body{
-        background:var(--bg);
-        display:flex;
-        height:100vh;
-        align-items:center;
-        justify-content:center;
-        font-family:Arial;
-    }
-    .box{
-        background:#fff;width:380px;padding:24px;border-radius:12px;
-        box-shadow:0 6px 18px rgba(0,0,0,0.1);
-    }
-    .tabs{display:flex;margin-bottom:18px}
-    .tab{
-        flex:1;text-align:center;padding:10px;font-weight:bold;
-        cursor:pointer;background:#eee;border-radius:6px
-    }
-    .tab.active{background:var(--green);color:#fff}
-    .error{background:#ffd6d6;color:#b30000;padding:10px;border-radius:6px;margin-bottom:10px}
-    label{margin-top:10px;display:block;font-weight:bold}
-    input{width:100%;padding:10px;margin-top:5px;border-radius:6px;border:1px solid #ccc}
-    button{
-        width:100%;margin-top:15px;padding:10px;background:var(--green);
-        color:white;border:0;border-radius:6px;font-size:16px;cursor:pointer
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 

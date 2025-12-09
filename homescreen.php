@@ -13,76 +13,7 @@ include "connection.php";
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-    <style>
-        :root {
-            --primary-green: #2f7a2f;
-            --bg-color: #f4f6f4;
-            --text-color: #333;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-color);
-        }
-
-        .top-nav {
-            background: #fff;
-            padding: 15px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            border-bottom: 3px solid var(--primary-green);
-        }
-        .page-title {
-            margin: 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-green);
-            line-height: 1.5;
-        }
-
-        .main-panel {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            padding: 20px;
-        }
-
-        .zoo-table thead tr {
-            background-color: var(--primary-green);
-            color: white;
-        }
-        .zoo-table th, .zoo-table td {
-            padding: 12px 15px !important;
-            vertical-align: middle !important;
-        }
-        .zoo-table tbody tr:hover {
-            background-color: #f9fff9;
-        }
-
-        .thumb-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border: 2px solid #eee;
-        }
-
-        .btn-pill {
-            border-radius: 50px;
-            padding: 6px 20px;
-            font-weight: 600;
-            border: none;
-            transition: all 0.3s;
-        }
-        .btn-pill:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .btn-search { background: #f0ad4e; color: white; }
-        .btn-logout { background: #e74c3c; color: white; }
-        .btn-info { border-radius: 20px !important; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
