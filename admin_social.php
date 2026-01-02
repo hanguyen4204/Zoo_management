@@ -41,7 +41,7 @@ $res = mysqli_query($link, $sql);
     <style>
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         
-        /* SIDEBAR STYLE (Giống ảnh bạn gửi) */
+        /* SIDEBAR STYLE */
         .sidebar { height: 100vh; width: 250px; position: fixed; top: 0; left: 0; background: #0b3d2e; color: #fff; z-index: 1000; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header h3 { color: #f4f91d; margin:0; font-weight:800; font-size: 24px; }
