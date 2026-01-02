@@ -3,7 +3,7 @@ session_start();
 include "connection.php";
 
 // ================= 1. LOGIC LẤY THÔNG TIN USER (HEADER) =================
-$my_avatar = 'uploads/default_user.png'; // Ảnh mặc định
+$my_avatar = 'uploads/default_user.png'; 
 $my_name = 'Guest';
 
 if (isset($_SESSION['id_user'])) {
