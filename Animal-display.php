@@ -2,7 +2,7 @@
 session_start();
 include "connection.php";
 
-// ================= 1. LOGIC USER (GIỐNG HOMESCREEN) =================
+// ================= 1. LOGIC USER =================
 $my_avatar = 'uploads/default_user.png';
 $my_name = 'Guest';
 
@@ -21,7 +21,7 @@ if (isset($_SESSION['id_user'])) {
 
 // ================= 2. LOGIC TÌM KIẾM ĐỘNG VẬT =================
 $search_term = "";
-$sql = "SELECT * FROM table1"; // Mặc định lấy hết
+$sql = "SELECT * FROM table1";
 
 if (isset($_GET['search']) && !empty($_GET['q'])) {
     $search_term = mysqli_real_escape_string($link, $_GET['q']);
@@ -49,7 +49,7 @@ $res = mysqli_query($link, $sql);
     /* ================= GLOBAL ================= */
     body { background-color: #f4f6f4; font-family: 'Segoe UI', sans-serif; }
 
-    /* ================= HEADER STYLE (CHUẨN TỪ HOMESCREEN) ================= */
+    /* ================= HEADER STYLE ================= */
     .zoo-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
     .zoo-nav { display: flex; align-items: center; justify-content: space-between; }
     .zoo-logo { font-size: 24px; font-weight: 800; color: #0b3d2e; text-decoration: none; }
