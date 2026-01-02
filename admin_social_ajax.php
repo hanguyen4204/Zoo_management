@@ -2,7 +2,7 @@
 session_start();
 include "connection.php";
 
-// 1. CHECK QUYỀN ADMIN (Bảo mật tuyệt đối)
+// 1. CHECK QUYỀN ADMIN
 if (!isset($_SESSION['id_user'])) { exit('login_required'); }
 $current_id = $_SESSION['id_user'];
 $check_admin = mysqli_query($link, "SELECT role FROM users WHERE id_user = '$current_id'");

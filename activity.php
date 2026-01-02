@@ -233,7 +233,7 @@ $res = mysqli_query($link, $sql);
             // 3. Xử lý Zone
             $zoneName = !empty($row["zone_name"]) ? $row["zone_name"] : "General Area";
 
-            // 4. Lấy link file chi tiết (nếu có)
+            // 4. Lấy link file chi tiết
             $linkUrl = !empty($row["file_link"]) ? $row["file_link"] : "#";
     ?>
         
