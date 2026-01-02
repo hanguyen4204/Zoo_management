@@ -45,7 +45,7 @@ function getZoneIcon($name) {
     if (stripos($name, 'bird') !== false || stripos($name, 'reptile') !== false) return '🦜';
     if (stripos($name, 'farm') !== false || stripos($name, 'pet') !== false) return '🐰';
     if (stripos($name, 'water') !== false || stripos($name, 'aqua') !== false) return '🐬';
-    return '🌿'; // Default
+    return '🌿';
 }
 ?>
 
@@ -64,7 +64,7 @@ function getZoneIcon($name) {
     /* ================= GLOBAL ================= */
     body{ background-color: #f4f6f4; font-family: 'Segoe UI', sans-serif; }
 
-    /* ================= HEADER (ĐỒNG BỘ) ================= */
+    /* ================= HEADER ================= */
     .zoo-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
     .zoo-nav { display: flex; align-items: center; justify-content: space-between; }
     .zoo-logo { font-size: 24px; font-weight: 800; color: #0b3d2e; text-decoration: none; }
