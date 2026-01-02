@@ -30,10 +30,10 @@ if (isset($_SESSION['id_user'])) {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <style>
-    /* GLOBAL */
+
     body { background-color: #f4f6f4; font-family: 'Segoe UI', sans-serif; color: #333; }
 
-    /* HEADER (Giữ nguyên) */
+    
     .zoo-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
     .zoo-nav { display: flex; align-items: center; justify-content: space-between; }
     .zoo-logo { font-size: 24px; font-weight: 800; color: #0b3d2e; text-decoration: none; }
@@ -45,7 +45,7 @@ if (isset($_SESSION['id_user'])) {
     .buy-ticket { background: #f4f91d; color: #0b3d2e; font-weight: 700; padding: 10px 25px; border-radius: 999px; text-decoration: none; transition: 0.25s ease; white-space: nowrap; }
     .buy-ticket:hover { background: #e6eb00; text-decoration: none; color: #0b3d2e; }
 
-    /* USER AVATAR */
+    
     .user-menu { position: relative; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #0b3d2e; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 2px solid #eee; }
     .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -54,19 +54,19 @@ if (isset($_SESSION['id_user'])) {
     .user-dropdown a { display: block; padding: 12px 20px; color: #222; text-decoration: none; font-weight: 600; }
     .user-dropdown a:hover { background: #f4f6f4; color: #0b3d2e; }
 
-    /* ================= ABOUT US STYLES ================= */
+    
     
     /* 1. HERO BANNER */
     .about-hero {
         position: relative; height: 50vh;
-        /* Gợi ý ảnh: Toàn cảnh sở thú */
+        
         background: linear-gradient(rgba(11, 61, 46, 0.7), rgba(11, 61, 46, 0.7)), url('uploads/1767315205_Screenshot 2025-11-18 122110.png') center/cover fixed;
         display: flex; align-items: center; justify-content: center; text-align: center; color: white;
     }
     .about-hero h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
     .about-hero p { font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.9; }
 
-    /* 2. INTRO SECTION */
+    
     .intro-section { padding: 80px 0; }
     .intro-img { 
         width: 100%; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); 
@@ -76,7 +76,7 @@ if (isset($_SESSION['id_user'])) {
     .section-title { color: #0b3d2e; font-weight: 800; margin-bottom: 25px; position: relative; display: inline-block; }
     .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: #f4f91d; margin-top: 10px; }
 
-    /* 3. MISSION CARDS */
+    
     .mission-section { background: #fff; padding: 80px 0; }
     .mission-card {
         background: #f4f6f4; padding: 40px 30px; border-radius: 15px;
@@ -87,7 +87,7 @@ if (isset($_SESSION['id_user'])) {
     .mission-icon { font-size: 50px; color: #0b3d2e; margin-bottom: 20px; }
     .mission-card h4 { font-weight: 700; margin-bottom: 15px; }
 
-    /* 4. STATS BANNER */
+    
     .stats-section {
         background: #0b3d2e; color: white; padding: 60px 0; text-align: center;
     }
