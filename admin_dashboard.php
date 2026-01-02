@@ -1,224 +1,267 @@
 <?php
+session_start();
 include "connection.php";
+
+// ================= 1. CHECK QUYỀN ADMIN =================
+if (!isset($_SESSION['id_user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$current_id = $_SESSION['id_user'];
+$check_admin = mysqli_query($link, "SELECT * FROM users WHERE id_user = '$current_id' AND role = 'admin'");
+
+if (mysqli_num_rows($check_admin) == 0) {
+    // Nếu không phải admin, đá về trang chủ
+    header("Location: homescreen.php");
+    exit();
+}
+
+// Lấy thông tin Admin để hiện Avatar
+$admin_data = mysqli_fetch_assoc($check_admin);
+$admin_name = $admin_data['username'];
+$admin_photo = !empty($admin_data['photo']) ? $admin_data['photo'] : "uploads/default_user.png";
+
+// ================= 2. THỐNG KÊ SỐ LIỆU (DASHBOARD) =================
+// Đếm số thú
+$count_animals = mysqli_fetch_array(mysqli_query($link, "SELECT COUNT(*) FROM table1"))[0];
+
+// Đếm số vé đã bán (Giả sử bạn có bảng 'tickets_booked' hoặc tương tự, nếu chưa có tôi để tạm 0)
+// $count_tickets = mysqli_fetch_array(mysqli_query($link, "SELECT COUNT(*) FROM ticket_history"))[0]; 
+$count_tickets = 0; // Tạm thời để 0
+
+// Đếm tổng User
+$count_users = mysqli_fetch_array(mysqli_query($link, "SELECT COUNT(*) FROM users WHERE role != 'admin'"))[0];
+
+// Đếm sự kiện
+$count_activities = mysqli_fetch_array(mysqli_query($link, "SELECT COUNT(*) FROM activity"))[0];
+
 ?>
 
-<html lang="en" xmlns="">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Thong tin dong vat</title>
-    <meta charset="utf-8">
-     <meta http-equiv="X-UA-Compatible" content="IE-edge">
-    <meta name="viewport" content="width=device-width, initial-scale=0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Zoo Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
-        /* --- 1. KHAI BÁO MÀU DÙNG CHUNG (Giống hệt trang kia) --- */
-        :root {
-            --primary-green: #2f7a2f; /* Xanh lá đậm */
-            --bg-color: #f4f6f4;      /* Nền xám nhạt */
-            --text-color: #333;
+        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
+        /* SIDEBAR STYLE */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0; left: 0;
+            background: #0b3d2e; /* Màu xanh Zoo */
+            color: #fff;
+            transition: 0.3s;
+            z-index: 1000;
         }
-
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-color);
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h3 { font-weight: 800; margin: 0; color: #f4f91d; font-size: 22px; }
+        
+        .sidebar-menu { padding: 20px 0; }
+        .sidebar-menu a {
+            padding: 15px 25px;
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.2s;
+            border-left: 4px solid transparent;
         }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border-left-color: #f4f91d;
+        }
+        .sidebar-menu i { width: 25px; }
 
-        /* --- 2. THANH HEADER TRÊN CÙNG --- */
-        .top-nav {
+        /* MAIN CONTENT STYLE */
+        .main-content { margin-left: 250px; padding: 20px; }
+        
+        /* TOP BAR */
+        .topbar {
             background: #fff;
-            padding: 15px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid var(--primary-green);
         }
-        .page-title {
-            margin: 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-green);
-            line-height: 1.5;
-        }
+        .admin-profile { display: flex; align-items: center; gap: 10px; }
+        .admin-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #f4f91d; }
 
-        /* --- 3. KHUNG CHỨA BẢNG (MAIN PANEL) --- */
-        .main-panel {
+        /* DASHBOARD CARDS */
+        .stat-card {
             background: #fff;
-            border-radius: 12px;
+            border-radius: 15px;
+            padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            padding: 20px;
-            border: none; /* Bỏ viền mặc định của BS3 */
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            border-left: 5px solid #0b3d2e;
         }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .stat-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: #e8f5e9;
+            color: #0b3d2e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .stat-info h3 { margin: 0; font-size: 28px; font-weight: 800; color: #333; }
+        .stat-info p { margin: 0; color: #777; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- 4. TÙY CHỈNH BẢNG (TABLE) --- */
-        .zoo-table thead tr {
-            background-color: var(--primary-green);
-            color: white;
-        }
-        .zoo-table th {
-            border-bottom: none !important;
-            padding: 15px !important;
-            font-weight: 600;
-        }
-        .zoo-table td {
-            padding: 12px 15px !important;
-            vertical-align: middle !important; /* Căn giữa chiều dọc */
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .zoo-table tbody tr:hover {
-            background-color: #f9fff9; /* Màu nền khi di chuột */
-        }
-        
-        /* Ảnh thumbnail trong bảng */
-        .thumb-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border: 2px solid #eee;
-        }
+        /* Colors for cards */
+        .card-blue { border-left-color: #3498db; } .card-blue .stat-icon { color: #3498db; background: #eaf6fc; }
+        .card-orange { border-left-color: #f39c12; } .card-orange .stat-icon { color: #f39c12; background: #fdf5e6; }
+        .card-red { border-left-color: #e74c3c; } .card-red .stat-icon { color: #e74c3c; background: #fdedec; }
 
-        /* --- 5. NÚT BẤM (Bo tròn viên thuốc) --- */
-        .btn-pill {
-            border-radius: 50px;
-            padding: 6px 20px;
-            font-weight: 600;
-            border: none;
-            transition: all 0.3s;
-        }
-        .btn-pill:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* Màu nút */
-        .btn-add { background: var(--primary-green); color: white; }
-        .btn-add:hover { background: #256125; color: white; }
-        
-        .btn-search { background: #f0ad4e; color: white; } /* Màu cam */
-        .btn-search:hover { background: #ec971f; color: white; }
-
-        .btn-logout { background: #e74c3c; color: white; }
-        .btn-logout:hover { background: #c0392b; color: white; }
-
-        /* Nút hành động nhỏ trong bảng */
-        .action-icon {
-            margin: 0 5px;
-            font-size: 16px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { left: -250px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
 <body>
-<div class="top-nav">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-6">
-                    <h1 class="page-title">🦁 Quản Lý Sở Thú</h1>
-                </div>
-                <div class="col-xs-6 text-right">
-                    <a href="index.php" class="btn btn-logout btn-pill">
-                        <i class="fa fa-sign-out"></i> Đăng xuất
-                    </a>
-                </div>
-            </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>🦁 ZOO ADMIN</h3>
+        </div>
+        <div class="sidebar-menu">
+            <a href="admin_dashboard.php" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="admin_animals.php"><i class="fas fa-paw"></i> Quản lý Thú</a>
+            <a href="admin_zones.php"><i class="fas fa-map-marked-alt"></i> Khu vực (Zones)</a>
+            <a href="admin_activities.php"><i class="fas fa-calendar-alt"></i> Sự kiện</a>
+            <a href="admin_tickets.php"><i class="fas fa-ticket-alt"></i> Vé đặt</a>
+            <a href="admin_users.php"><i class="fas fa-users"></i> Người dùng</a>
+            <a href="admin_social.php"><i class="fas fa-comments"></i> Mạng xã hội</a>
+            <a href="homescreen.php" target="_blank" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1)"><i class="fas fa-external-link-alt"></i> Xem trang chủ</a>
+            <a href="logout.php" class="text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
     </div>
 
-<div class="container">
-
-        <?php
-        if (isset($_GET['msg']) && $_GET['msg'] == 'success') {
-            echo '
-            <div id="success-alert" class="alert alert-success alert-dismissible" style="border-radius: 8px;">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong><i class="fa fa-check-circle"></i> Thành công!</strong> Dữ liệu đã được cập nhật.
+    <div class="main-content">
+        
+        <div class="topbar">
+            <h4 style="margin:0; font-weight:700; color:#0b3d2e;">Dashboard Overview</h4>
+            <div class="admin-profile">
+                <div class="text-right mr-2">
+                    <div style="font-weight:700; font-size:14px;"><?= $admin_name ?></div>
+                    <div style="font-size:12px; color:#888;">Administrator</div>
+                </div>
+                <img src="<?= $admin_photo ?>" class="admin-avatar">
             </div>
-            ';
-        }
-        ?>
-<div class="main-panel">
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3><?= $count_animals ?></h3>
+                        <p>Animals</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card card-blue">
+                    <div class="stat-info">
+                        <h3><?= $count_users ?></h3>
+                        <p>Members</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card card-orange">
+                    <div class="stat-info">
+                        <h3><?= $count_activities ?></h3>
+                        <p>Activities</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card card-red">
+                    <div class="stat-info">
+                        <h3><?= $count_tickets ?></h3>
+                        <p>Tickets Sold</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0 font-weight-bold text-dark"><i class="fas fa-clock text-warning"></i> Recent Animals Added</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead style="background:#f8f9fa;">
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Species</th>
+                                    <th>Zone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                // Lấy 5 con vật mới nhất
+                                $sql_recent = "SELECT * FROM table1 ORDER BY id DESC LIMIT 5";
+                                $res_recent = mysqli_query($link, $sql_recent);
+                                while($row = mysqli_fetch_array($res_recent)){
+                                    $img = !empty($row['photo']) ? $row['photo'] : 'uploads/animal_default.png';
+                                    // Giả lập tên Zone (nếu chưa join bảng zone)
+                                    $z_id = $row['zone_id'];
+                                    $z_name = ($z_id == 1) ? 'Predators' : (($z_id == 2) ? 'Giants' : 'Others');
+                                ?>
+                                <tr>
+                                    <td><img src="<?= $img ?>" style="width:40px; height:40px; border-radius:5px; object-fit:cover;"></td>
+                                    <td><strong><?= $row['AName'] ?></strong></td>
+                                    <td><?= $row['Species'] ?></td>
+                                    <td><span class="badge badge-info"><?= $z_name ?></span></td>
+                                </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             
-            <div class="row" style="margin-bottom: 20px;">
-                <div class="col-md-8">
-                    <form action="" method="post" class="form-inline">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="search_name" 
-                                   placeholder="Nhập tên động vật..." 
-                                   value="<?php if(isset($_POST['search_name'])) echo $_POST['search_name']; ?>" 
-                                   style="height: 40px; border-radius: 20px 0 0 20px; width: 300px; border: 1px solid #ddd;">
-                            <span class="input-group-btn">
-                                <button class="btn btn-search" type="submit" name="search" 
-                                        style="height: 40px; border-radius: 0 20px 20px 0; padding: 0 20px;">
-                                    <i class="fa fa-search"></i> Tìm kiếm
-                                </button>
-                            </span>
-                        </div>
-                    </form>
-                </div>
-                
-                <div class="col-md-4 text-right">
-                    <a href="add.php" class="btn btn-add btn-pill">
-                        <i class="fa fa-plus-circle"></i> Thêm động vật
-                    </a>
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <img src="uploads/admin_welcome.svg" style="width:60%; opacity:0.8; margin-bottom:20px;" onerror="this.style.display='none'">
+                        <h5>Welcome back!</h5>
+                        <p class="text-muted">Manage your zoo efficiently using the sidebar menu.</p>
+                        <a href="admin_add_animal.php" class="btn btn-success btn-block rounded-pill font-weight-bold">
+                            <i class="fas fa-plus"></i> Add New Animal
+                        </a>
+                    </div>
                 </div>
             </div>
-<div class="table-responsive">
-                <table class="table zoo-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">ID</th>
-                            <th style="width: 100px;">Ảnh</th>
-                            <th>Tên</th>
-                            <th>Mô tả</th>
-                            <th class="text-center" style="width: 200px;">Hành động</th>
-                        </tr>
-                    </thead>
-    <tbody>
-        <?php
-        if (!empty($link)) {
-    if (isset($_POST["search"]) && !empty($_POST["search_name"])) {
-        $search_name = mysqli_real_escape_string($link, $_POST["search_name"]);
-        setcookie("last_search", $search_name, time() + (86400 * 30), "/");
-        $res = mysqli_query($link, "SELECT * FROM table1 WHERE AName LIKE '%$search_name%'");
-    } else {
-        $res = mysqli_query($link, "SELECT * FROM table1");
-    }
-}
+        </div>
 
-   while($row=mysqli_fetch_array($res)) {
-        echo "<tr>";
-         // ID
-        echo "<td><span class='label label-default'>#" . $row["id"] . "</span></td>";
-                            
-        // Ảnh (Bo tròn)
-        $img_src = !empty($row["photo"]) ? $row["photo"] : 'uploads/default.png';
-                            echo "<td><img src='$img_src' class='thumb-img'></td>";
-                            
-        // Tên (In đậm màu xanh)
-           echo "<td><strong style='color: var(--primary-green); font-size: 16px;'>" . $row["AName"] . "</strong></td>";
-                            
-        // Mô tả
-        echo "<td style='color: #666;'>" . $row["des"] . "</td>";
-                            
-        // Nút hành động (Gom vào 1 cột)
-        echo "<td class='text-center'>";
-                            
-        // Nút Chi tiết (Màu xanh dương nhạt)
-        echo "<a href='view_animal.php?id=" . $row["id"] . "' class='btn btn-info btn-xs btn-pill' title='Chi tiết' style='margin-right: 5px;'>";
-        echo "<i class='fa fa-eye'></i> Xem";
-        echo "</a>";
+    </div>
 
-        // Nút Xóa (Màu đỏ nhạt)
-        echo "<a href='delete.php?id=" . $row["id"] . "' onclick=\"return confirm('Bạn chắc chắn muốn xóa " . $row['AName'] . " chứ?')\" class='btn btn-danger btn-xs btn-pill' title='Xóa'>";
-        echo "<i class='fa fa-trash'></i> Xóa";
-        echo "</a>";
-                            
-        echo "</td>";
-        echo "</tr>";
-            }
-        ?>
-    </tbody>
-        </table>
-</div>
 </body>
 </html>
