@@ -7,7 +7,7 @@ include "connection.php";
   - User đã login
   - Bảng users có khóa chính: id_user
 */
-$id_customer = $_SESSION['id_user'] ?? 1; // test nhanh nếu chưa có login
+$id_customer = $_SESSION['id_user'] ?? 1;
 
 $PRICE = 80000;
 
