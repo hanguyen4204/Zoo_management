@@ -73,12 +73,12 @@ if (isset($_POST["update"])) {
     $Date = trim($_POST['Date'] ?? '');
     $des = trim($_POST['des'] ?? '');
 
-    // Basic validation (bạn có thể mở rộng)
+    // Basic validation
     $errors = [];
     if ($AName === '') $errors[] = "Tên không được để trống.";
 
     // Handle file upload if provided
-    $photoPath = null; // nếu có file mới, sẽ lưu đường dẫn relative
+    $photoPath = null; 
     if (!empty($_FILES['photo']['name']) && isset($_FILES['photo'])) {
         $f = $_FILES['photo'];
         if ($f['error'] === UPLOAD_ERR_OK) {
@@ -148,7 +148,7 @@ if (isset($_POST["update"])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- giữ bootstrap như cũ -->
+    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
