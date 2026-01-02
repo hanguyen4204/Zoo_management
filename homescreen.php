@@ -1,208 +1,184 @@
 <?php
-session_start();
 include "connection.php";
-
-// ================= 1. LOGIC LẤY THÔNG TIN USER =================
-$my_avatar = 'uploads/default_user.png'; // Ảnh mặc định
-$my_name = 'Guest';
-
-// Kiểm tra login
-if (isset($_SESSION['id_user'])) {
-    $current_user_id = $_SESSION['id_user'];
-    
-    // Query lấy thông tin user mới nhất
-    $user_query = mysqli_query($link, "SELECT * FROM users WHERE id_user = '$current_user_id'");
-    
-    if ($current_user = mysqli_fetch_array($user_query)) {
-        $my_name = $current_user['username'];
-        if (!empty($current_user['photo'])) {
-            $my_avatar = $current_user['photo'];
-        }
-    }
-}
-
-// ================= 2. LOGIC LẤY DANH SÁCH ĐỘNG VẬT =================
-$res = mysqli_query($link, "SELECT * FROM table1");
 ?>
 
-<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Zoo Explorer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thông tin động vật</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0">
 
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-<style>
-/* ================= GLOBAL ================= */
-body{ margin:0; font-family:'Segoe UI',sans-serif; background:#f4f6f4; }
+    <style>
+        :root {
+            --primary-green: #2f7a2f;
+            --bg-color: #f4f6f4;
+            --text-color: #333;
+        }
 
-/* ================= HEADER STYLE (Đã cập nhật) ================= */
-.zoo-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-.zoo-nav { display: flex; align-items: center; justify-content: space-between; height: auto; } /* Auto height để linh hoạt */
-.zoo-logo { font-size: 24px; font-weight: 800; color: #0b3d2e; text-decoration: none; }
-.zoo-logo:hover { color: #0b3d2e; text-decoration: none; }
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
 
-/* MENU MỚI (Đơn giản, không có Mega Panel) */
-.zoo-menu { display: flex; gap: 30px; }
-.menu-item > a { 
-    text-decoration: none; 
-    color: #222; 
-    font-weight: 600; 
-    font-size: 16px;
-    padding: 10px 0; 
-    display: inline-block;
-    transition: 0.2s;
-}
-.menu-item > a:hover { color: #0b3d2e; }
+        .top-nav {
+            background: #fff;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-green);
+        }
+        .page-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-green);
+            line-height: 1.5;
+        }
 
-/* RIGHT ACTIONS */
-.zoo-actions { display: flex; align-items: center; gap: 20px; }
+        .main-panel {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
 
-.buy-ticket {
-    background: #f4f91d; color: #0b3d2e; font-weight: 700;
-    padding: 10px 25px; border-radius: 999px; text-decoration: none;
-    transition: 0.25s ease; white-space: nowrap;
-}
-.buy-ticket:hover { background: #e6eb00; text-decoration: none; color: #0b3d2e; }
+        .zoo-table thead tr {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        .zoo-table th, .zoo-table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        .zoo-table tbody tr:hover {
+            background-color: #f9fff9;
+        }
 
-/* USER AVATAR & DROPDOWN */
-.user-menu { position: relative; }
-.user-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #0b3d2e; color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; user-select: none;
-    overflow: hidden; /* Cắt ảnh tròn */
-    border: 2px solid #eee;
-}
-.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
 
-.user-dropdown {
-    position: absolute; top: 52px; right: 0; width: 240px;
-    background: #fff; border-radius: 14px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15); padding: 10px 0;
-    opacity: 0; visibility: hidden; transform: translateY(10px);
-    transition: 0.25s ease; z-index: 2000;
-}
-.user-menu:hover .user-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-
-.user-dropdown a { display: block; padding: 12px 20px; color: #222; text-decoration: none; font-weight: 600; }
-.user-dropdown a:hover { background: #f4f6f4; color: #0b3d2e; }
-
-/* ================= HERO SECTION (Giữ nguyên) ================= */
-.hero{
-    position:relative; min-height:85vh;
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.15) 65%, rgba(0,0,0,0.05) 100%),
-    url("uploads/Screenshot 2025-11-08 160924.png") center/cover no-repeat;
-    display:flex; align-items:center; justify-content:center; text-align:center; color:#fff;
-}
-.hero-content{ max-width:1100px; padding:0 20px; }
-.hero h1{ font-size:clamp(48px, 8vw, 120px); font-weight:900; letter-spacing:2px; text-transform:uppercase; margin-bottom:24px; line-height:1.05; }
-.hero p{ font-size:clamp(16px, 2.2vw, 22px); font-weight:600; max-width:820px; margin:0 auto 36px; line-height:1.5; }
-.hero-actions{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
-.hero-btn{ padding:14px 34px; border-radius:999px; font-weight:800; text-decoration:none; font-size:15px; transition:0.25s ease; letter-spacing:0.5px; }
-.hero-btn.primary{ background:#f4f91d; color:#0b3d2e; }
-.hero-btn.primary:hover{ background:#e6eb00; }
-.hero-btn.secondary{ background:#ffffff; color:#0b3d2e; }
-.hero-btn.secondary:hover{ background:#f1f1f1; }
-
-/* ================= ANIMAL CARDS ================= */
-.animal-card{ background:#fff; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.08); margin-bottom:30px; overflow:hidden; display:flex; flex-direction:column; height:100%; }
-.animal-card img{ width:100%; height:200px; object-fit:cover; }
-.animal-info{ padding:16px; display:flex; flex-direction:column; flex-grow:1; }
-.animal-info h4{ color:#0b3d2e; font-weight:700; margin-top: 0; }
-.desc{ color:#555; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.animal-info a{ margin-top:auto; font-weight:600; color:#0b3d2e; }
-
-footer{ background:#0b3d2e; color:white; padding:30px 0; margin-top:60px; }
-</style>
+        .btn-pill {
+            border-radius: 50px;
+            padding: 6px 20px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-search { background: #f0ad4e; color: white; }
+        .btn-logout { background: #e74c3c; color: white; }
+        .btn-info { border-radius: 20px !important; }
+    </style>
 </head>
 
 <body>
-
-<header class="zoo-header">
-    <div class="container zoo-nav">
-        <a href="homescreen.php" class="zoo-logo">🐾 Zoo Explorer</a>
-
-        <nav class="zoo-menu hidden-xs hidden-sm">
-            <div class="menu-item"><a href="homescreen.php" style="color:#0b3d2e; font-weight:700;">Home</a></div>
-            <div class="menu-item"><a href="Animal-display.php">Animals</a></div> 
-            <div class="menu-item"><a href="activity.php">Activities</a></div>
-            <div class="menu-item"><a href="zone.php">Zones</a></div>
-            <div class="menu-item"><a href="zoo_social.php">Community</a></div>
-            <div class="menu-item"><a href="about_us.php">About us</a></div>
-        </nav>
-
-        <div class="zoo-actions">
-            <a href="ticket.php" class="buy-ticket hidden-xs">BUY TICKETS</a>
-
-            <div class="user-menu">
-                <div class="user-avatar">
-                    <img src="<?= $my_avatar ?>" alt="Avatar">
-                </div>
-
-                <div class="user-dropdown">
-                    <div style="padding: 10px 20px; border-bottom:1px solid #eee; color:#0b3d2e; font-weight:bold;">
-                        Hello, <?= $my_name ?>
-                    </div>
-                    <a href="Profile_user.php"><i class="fas fa-user-circle"></i> Account info</a>
-                    <a href="ticket_history.php"><i class="fas fa-ticket-alt"></i> Ticket history</a>
-                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
+<div class="top-nav">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6">
+                <h1 class="page-title">🐾 Thông tin Động Vật</h1>
+            </div>
+            <div class="col-xs-6 text-right">
+<a href="logout.php" class="btn btn-logout btn-pill">
+                    <i class="fa fa-sign-out"></i> Đăng xuất
+                </a>
             </div>
         </div>
-    </div>
-</header>
-
-<section class="hero">
-    <div class="hero-content">
-        <h1>
-            ONE TICKET.<br>
-            TWO VISITS.
-        </h1>
-        <p>
-            Our Christmas gift to you – visit in December and you can
-            come back again for free between 5 Jan – 12 Feb 2026.
-        </p>
-        <div class="hero-actions">
-            <a href="tickets.php" class="hero-btn primary">BOOK TICKETS</a>
-            <a href="animals.php" class="hero-btn secondary">EXPLORE OUR ZOO</a>
-        </div>
-    </div>
-</section>
-
-<div class="container" style="margin-top:60px;">
-    <div class="row" style="margin-bottom: 30px;">
-        <div class="col-md-12 text-center">
-            <h2 style="color:#0b3d2e; font-weight:800; margin-bottom:10px;">Meet Our Animals</h2>
-            <p style="color:#666;">Discover the amazing wildlife we care for everyday.</p>
-        </div>
-    </div>
-
-    <div class="row">
-    <?php while($row=mysqli_fetch_array($res)){
-        $img = !empty($row["photo"]) ? $row["photo"] : "uploads/default.png";
-    ?>
-    <div class="col-md-4 col-sm-6">
-        <div class="animal-card">
-            <img src="<?= $img ?>">
-            <div class="animal-info">
-                <h4><?= $row["AName"] ?></h4>
-                <p class="desc"><?= $row["des"] ?></p>
-                <a href="view_animal_user.php?id=<?= $row["id"] ?>">View details <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </div>
-    <?php } ?>
     </div>
 </div>
 
-<footer class="text-center">
-    <p>© 2026 Zoo Explorer – Educational Project</p>
-</footer>
+<div class="container">
+
+    <div class="main-panel">
+
+        <!-- Ô tìm kiếm -->
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-md-12">
+                <form action="" method="post" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search_name"
+                               placeholder="Nhập tên động vật..."
+                               value="<?php if(isset($_POST['search_name'])) echo $_POST['search_name']; ?>"
+                               style="height: 40px; border-radius: 20px 0 0 20px; width: 300px; border: 1px solid #ddd;">
+                        <span class="input-group-btn">
+                            <button class="btn btn-search" type="submit" name="search"
+                                    style="height: 40px; border-radius: 0 20px 20px 0; padding: 0 20px;">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="table-responsive">
+            <table class="table zoo-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th style="width: 100px;">Ảnh</th>
+                        <th>Tên</th>
+                        <th>Mô tả</th>
+                        <th class="text-center" style="width: 120px;">Chi tiết</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                <?php
+                if (!empty($link)) {
+                    if (isset($_POST["search"]) && !empty($_POST["search_name"])) {
+                        $search_name = mysqli_real_escape_string($link, $_POST["search_name"]);
+                        setcookie("last_search", $search_name, time() + (86400 * 30), "/");
+                        $res = mysqli_query($link, "SELECT * FROM table1 WHERE AName LIKE '%$search_name%'");
+                    } else {
+                        $res = mysqli_query($link, "SELECT * FROM table1");
+                    }
+                }
+
+                while($row=mysqli_fetch_array($res)) {
+                    echo "<tr>";
+
+                    echo "<td><span class='label label-default'>#" . $row["id"] . "</span></td>";
+
+                    $img_src = !empty($row["photo"]) ? $row["photo"] : 'uploads/default.png';
+                    echo "<td><img src='$img_src' class='thumb-img'></td>";
+
+                    echo "<td><strong style='color: var(--primary-green); font-size: 16px;'>" . $row["AName"] . "</strong></td>";
+
+                    echo "<td style='color: #666;'>" . $row["des"] . "</td>";
+
+                    // ❗ NGƯỜI DÙNG CHỈ ĐƯỢC XEM (KHÔNG SỬA/XÓA)
+                    echo "<td class='text-center'>
+                            <a href='view_animal_user.php?id=" . $row["id"] . "' 
+                               class='btn btn-info btn-xs btn-pill'>
+                                <i class='fa fa-eye'></i> Xem
+                            </a>
+                        </td>";
+
+                    echo "</tr>";
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
 
 </body>
 </html>
