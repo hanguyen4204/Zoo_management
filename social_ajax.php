@@ -11,7 +11,7 @@ if (!isset($_SESSION['id_user'])) {
 $current_user_id = $_SESSION['id_user'];
 
 // =======================================================
-// 1. XỬ LÝ ĐĂNG BÀI (ĐÂY LÀ PHẦN BẠN BỊ THIẾU)
+// 1. XỬ LÝ ĐĂNG BÀI
 // =======================================================
 if (isset($_POST['action']) && $_POST['action'] == 'post_status') {
     $content = mysqli_real_escape_string($link, $_POST['content']);
