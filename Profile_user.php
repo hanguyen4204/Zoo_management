@@ -1,13 +1,11 @@
 <?php
 session_start();
 include "connection.php";
-
 /* Kiểm tra đăng nhập */
 if(!isset($_SESSION['id_user'])){
     header("Location: homescreen.php");
     exit;
 }
-
 $id_user = $_SESSION['id_user'];
 
 /* Lấy thông tin user */
@@ -16,11 +14,9 @@ $res = mysqli_query($link,"
     FROM users
     WHERE id_user = $id_user
 ");
-
 if(mysqli_num_rows($res) == 0){
     die("User not found");
 }
-
 $user = mysqli_fetch_assoc($res);
 
 /* Avatar mặc định nếu chưa có ảnh */
@@ -44,7 +40,6 @@ body{
     background:#f4f6f4;
     font-family:'Segoe UI',sans-serif;
 }
-
 /* PROFILE CARD */
 .profile-box{
     max-width:480px;
@@ -55,7 +50,6 @@ body{
     box-shadow:0 12px 30px rgba(0,0,0,0.12);
     text-align:center;
 }
-
 /* AVATAR */
 .avatar{
     width:140px;
@@ -79,7 +73,6 @@ body{
     font-size:16px;
     margin-bottom:30px;
 }
-
 /* BUTTONS */
 .profile-actions{
     display:flex;
@@ -100,7 +93,6 @@ body{
     text-decoration:none;
     color:#0b3d2e;
 }
-
 .btn-back{
     border:2px solid #0b3d2e;
     color:#0b3d2e;
