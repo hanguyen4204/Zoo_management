@@ -32,7 +32,6 @@ if (isset($_POST["update"])) {
         SELECT id_user FROM users 
         WHERE email = '$new_email' AND id_user != $id_user
     ");
-
     if (mysqli_num_rows($check) > 0) {
         $error = "This email address is already in use.";
     } else {
@@ -40,7 +39,6 @@ if (isset($_POST["update"])) {
         $sql = "UPDATE users SET 
                 username = '$new_username',
                 email    = '$new_email'";
-
         /* --- UPLOAD AVATAR --- */
         if (!empty($_FILES["photo"]["name"])) {
 
